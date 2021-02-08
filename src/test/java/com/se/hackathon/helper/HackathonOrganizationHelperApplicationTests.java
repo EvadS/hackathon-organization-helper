@@ -1,4 +1,4 @@
-package com.se.pet.hackathonorganizationhelper;
+package com.se.hackathon.helper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
