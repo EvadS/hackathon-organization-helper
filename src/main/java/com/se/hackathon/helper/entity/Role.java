@@ -1,6 +1,7 @@
-package com.se.hackathon.helper.model;
+package com.se.hackathon.helper.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.se.hackathon.helper.model.UserModel;
 import com.se.hackathon.helper.model.enums.RoleName;
 import lombok.Data;
 import org.hibernate.annotations.NaturalId;
@@ -9,8 +10,7 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "role_table")
+@Entity(name = "ROLE")
 @Data
 public class Role {
 
@@ -23,9 +23,13 @@ public class Role {
     @Column(name = "ROLE_NAME")
     @Enumerated(EnumType.STRING)
     @NaturalId
-    private RoleName name;
+    private RoleName role;
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<User> userList = new HashSet<>();
+
+    public boolean isAdminRole() {
+        return null != this && this.role.equals(RoleName.ROLE_ADMIN);
+    }
 }

@@ -2,6 +2,7 @@ package com.se.hackathon.helper.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.se.hackathon.helper.entity.Role;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -11,14 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-@Entity
-@Data
-@Table(name = "user")
-public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "USER_ID")
+public class UserModel {
+
     private Long id;
 
     private boolean corporate;
@@ -29,16 +25,6 @@ public class User {
 
     private boolean activated = false;
 
-
-    @JsonIgnore
-    @NotNull
-    @Size(min = 60, max = 60)
     private String password;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "USER_AUTHORITY", joinColumns = {
-            @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID")}, inverseJoinColumns = {
-            @JoinColumn(name = "ROLE_ID", referencedColumnName = "ROLE_ID")})
     private Set<Role> roles = new HashSet<>();
-
 }

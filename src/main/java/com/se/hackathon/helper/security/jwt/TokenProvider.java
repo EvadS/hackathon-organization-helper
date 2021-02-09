@@ -1,69 +1,92 @@
 package com.se.hackathon.helper.security.jwt;
 
+import com.se.hackathon.helper.security.CustomUserDetails;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.SignatureException;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Collection;
+import java.time.Instant;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 public class TokenProvider {
 
     private final Logger log = LoggerFactory.getLogger(TokenProvider.class);
-    private static final String AUTHORITIES_KEY = "auth";
 
+    private final String jwtSecret;
+    private final long jwtExpirationInMs;
 
-    @Value("$(jwt.secret)")
-    private String secretKey;
+    public TokenProvider(@Value("${app.jwt.secret}") String jwtSecret, @Value("${app.jwt.expiration}") long jwtExpirationInMs) {
+        this.jwtSecret = jwtSecret;
+        this.jwtExpirationInMs = jwtExpirationInMs;
+    }
 
     /**
-     * на вход которого будет приходить логин пользователя а на выходе будет строка jwt
-     * setExpiration — я указал 15 дней.
-     * @return
+     * Generates a token from a principal object. Embed the refresh token in the jwt
+     * so that a new jwt can be created
      */
-    public String generateToken(String login) {
-        Date date = Date.from(LocalDate.now().plusDays(15).atStartOfDay(ZoneId.systemDefault()).toInstant());
+    public String generateToken(CustomUserDetails customUserDetails) {
+        Instant expiryDate = Instant.now().plusMillis(jwtExpirationInMs);
         return Jwts.builder()
-                .setSubject(login)
-                .setExpiration(date)
-                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .setSubject(Long.toString(customUserDetails.getId()))
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(Date.from(expiryDate))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
 
+    /**
+     * Generates a token from a principal object. Embed the refresh token in the jwt
+     * so that a new jwt can be created
+     */
+    public String generateTokenFromUserId(Long userId) {
+        Instant expiryDate = Instant.now().plusMillis(jwtExpirationInMs);
+        return Jwts.builder()
+                .setSubject(Long.toString(userId))
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(Date.from(expiryDate))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
 
-    public Authentication getAuthentication(String token) {
+    /**
+     * Returns the user id encapsulated within the token
+     */
+    public Long getUserIdFromJWT(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(secretKey)
+                .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        return Long.parseLong(claims.getSubject());
     }
 
+    /**
+     * Returns the token expiration date encapsulated within the token
+     */
+    public Date getTokenExpiryFromJWT(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getExpiration();
+    }
+
+    /**
+     * Return the jwt expiration for the client so that they can execute
+     * the refresh token logic appropriately
+     */
+    public long getExpiryDuration() {
+        return jwtExpirationInMs;
+    }
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException e) {
             log.info("Invalid JWT signature.");

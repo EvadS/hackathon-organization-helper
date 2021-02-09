@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/trainer")
+@RequestMapping("/api/trainer")
 public class TrainerController {
     @GetMapping("/")
     public  String index(){

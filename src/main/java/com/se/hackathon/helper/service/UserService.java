@@ -1,20 +1,13 @@
 package com.se.hackathon.helper.service;
 
-import com.se.hackathon.helper.model.User;
-import com.se.hackathon.helper.model.UserRequest;
-import com.se.hackathon.helper.model.response.UserResponse;
+import com.se.hackathon.helper.entity.User;
+import com.se.hackathon.helper.model.request.RegistrationRequest;
 
 public interface UserService {
 
-    UserResponse saveUser (UserRequest userRequest);
+    User createUser(RegistrationRequest newRegistrationRequest);
 
-    UserResponse saveUser (User user);
+    User save(User newUser);
 
-    UserResponse updateUser (Long id, UserRequest userRequest);
-
-    UserResponse getById(Long id);
-
-    void delete(Long id);
-
-    User findByLoginAndPassword(String login, String password);
+    Boolean existsByEmail(String email);
 }

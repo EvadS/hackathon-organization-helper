@@ -1,0 +1,5 @@
+--Add initial role
+-- INSERT INTO hackaton_db.role (ROLE_NAME) VALUES ('ROLE_ADMIN');
+-- INSERT INTO hackaton_db.role (ROLE_NAME) VALUES ('ROLE_USER');
+-- INSERT INTO hackaton_db.role (ROLE_NAME) VALUES ('ROLE_ORGANISER');
+-- INSERT INTO hackaton_db.role (ROLE_NAME) VALUES ('ROLE_TRAINER');

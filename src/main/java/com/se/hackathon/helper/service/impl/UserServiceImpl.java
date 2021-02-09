@@ -1,94 +1,79 @@
 package com.se.hackathon.helper.service.impl;
 
-import com.se.hackathon.helper.model.Role;
-import com.se.hackathon.helper.model.User;
-import com.se.hackathon.helper.model.UserRequest;
-import com.se.hackathon.helper.model.enums.RoleName;
-import com.se.hackathon.helper.model.response.UserResponse;
+import com.se.hackathon.helper.entity.Role;
+import com.se.hackathon.helper.entity.User;
+import com.se.hackathon.helper.model.request.RegistrationRequest;
 import com.se.hackathon.helper.repository.RoleRepository;
 import com.se.hackathon.helper.repository.UserRepository;
+import com.se.hackathon.helper.service.RoleService;
 import com.se.hackathon.helper.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    //TODO:
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+
+    @Override
+    public User createUser(RegistrationRequest registerRequest) {
+        User newUser = new User();
+
+        newUser.setEmail(registerRequest.getEmail());
+        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        newUser.setUsername(registerRequest.getEmail());
+        newUser.addRoles(getRolesForNewUser(false));
+        newUser.setActive(true);
+        // TODO: stub
+        newUser.setEmailVerified(true);
+        return newUser;
     }
 
     @Override
-    public UserResponse saveUser(UserRequest userRequest) {
-        return null;
+    @Transactional
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
-    //TODO: refactored
-    @Override
-    public UserResponse saveUser(User user) {
-
-        // TODO: stub before db init script
-        Optional<Role> userRoleOpt = roleRepository.findByName("ROLE_USER");
-        Role userRole = userRoleOpt.orElseGet(() -> {
-            Role role = new Role();
-            role.setName(RoleName.ROLE_USER);
-            return roleRepository.save(role);
-        });
-
-        Set<Role> rolesSet = new HashSet<>();
-        rolesSet.add(userRole);
-        user.setRoles(rolesSet);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        user = userRepository.save(user);
-
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setUserName(user.getEmail());
-        return userResponse;
+    /**
+     * Check is the user exists given the email: naturalId
+     */
+    public Boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
-    @Override
-    public UserResponse updateUser(Long id, UserRequest userRequest) {
-        return null;
-    }
 
-    @Override
-    public UserResponse getById(Long id) {
-        return null;
-    }
-
-    @Override
-    public void delete(Long id) {
-
-    }
-
-    @Override
-    public User findByLoginAndPassword(String login, String password) {
-        User userEntity = findByLogin(login);
-        if (userEntity != null) {
-            if (passwordEncoder.matches(password, userEntity.getPassword())) {
-                return userEntity;
-            }
+    /**
+     * Performs a quick check to see what roles the new user could be assigned to.
+     *
+     * @return list of roles for the new user
+     */
+    private Set<Role> getRolesForNewUser(Boolean isToBeMadeAdmin) {
+        Set<Role> newUserRoles = new HashSet<>(roleService.findAll());
+        if (!isToBeMadeAdmin) {
+            newUserRoles.removeIf(Role::isAdminRole);
         }
-        return null;
+        logger.info("Setting user roles: " + newUserRoles);
+        return newUserRoles;
     }
-
-    // TODO:
-    private User findByLogin(String login) {
-        return userRepository.findOneByEmail(login).get();
-    }
-
 }

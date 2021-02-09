@@ -1,6 +1,6 @@
 package com.se.hackathon.helper.model;
 
-public class Trainer extends User {
+public class Trainer extends UserModel {
 
     int numOfTrainings;
     float teachExperience;
