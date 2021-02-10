@@ -102,3 +102,4 @@ hs_err_pid*
 /gradle/gradle-java-base_jar/build
 /gradle/gradle-java-base_jar/.idea
 .gradle
+/uploads/

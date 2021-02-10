@@ -94,6 +94,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/trainer/*").hasAnyRole("ADMIN", "TRAINER")
             .antMatchers("/api/user/*").hasAnyRole("ADMIN", "USER","TRAINER", "ORGANISER")
             .antMatchers("/**/api/auth/**").permitAll()
+            // TODO : for test
+            .antMatchers("/images/**").permitAll()
+
+
 
             .antMatchers(SWAGGER_UI_URL).permitAll()
         .and()

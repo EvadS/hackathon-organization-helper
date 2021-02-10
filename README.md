@@ -24,3 +24,8 @@ Gradle command line interface, how to set profile and open debug port
 ```bash
     java -jar -Dspring.profiles.active=dev ..?../admin-backend-api-1.0-SNAPSHOT.jar
 ```
+
+images 
+```http request
+  http://localhost:8000/uploads/1.gif
+```

@@ -31,7 +31,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("Swagger Sample APIs")
                 .description("This page lists all the rest apis for Swagger Sample App.")
-                .version("1.0-SNAPSHOT")
+                .version("1.gif.0-SNAPSHOT")
                 .build();
     }
 
