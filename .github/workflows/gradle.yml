@@ -1,11 +1,11 @@
-  ---------------------------------------------------------------------
-  # GitHub Action Workflow Basics
-  #
-  # Version      Date        Info
-  # 1.0          2020        Initial Version
-  #
-  # Made by Skiba Evgeniy Copyleft (c) 2020
-  #---------------------------------------------------------------------
+#---------------------------------------------------------------------
+# GitHub Action Workflow Basics
+#
+# Version      Date        Info
+# 1.0          2020        Initial Version
+#
+# Made by Skiba Evgeniy Copyleft (c) 2020
+#---------------------------------------------------------------------
 name: Java CI with Gradle
 
 on:
